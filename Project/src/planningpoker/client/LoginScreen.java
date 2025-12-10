@@ -194,6 +194,7 @@ public class LoginScreen extends JFrame {
     }
 
     // === SUNUCUYA BAĞLANMA ===
+    // === SUNUCUYA BAĞLANMA ===
     private void performLogin() {
         String username = nameField.getText().trim();
         if (username.isEmpty()) {
@@ -201,51 +202,102 @@ public class LoginScreen extends JFrame {
             return;
         }
 
-        String role = workerRadio.isSelected() ? "WORKER" : "OWNER";
+        // Kullanıcının seçtiği rol (sunucuya gidecek istek)
+        String desiredRole = workerRadio.isSelected() ? "WORKER" : "OWNER";
         String secret = new String(passwordField.getPassword());
 
-        if (role.equals("OWNER") && secret.trim().isEmpty()) {
+        if (desiredRole.equals("OWNER") && secret.trim().isEmpty()) {
             JOptionPane.showMessageDialog(this, "Owner şifresi gerekli!");
             return;
         }
 
         new Thread(() -> {
+            Socket tempSocket = null;
             try {
-                // Not: Port numarasını 5005 olarak değiştirdim (diğer hatayı önlemek için)
-                socket = new Socket("localhost", 5005);
-                out = new PrintWriter(socket.getOutputStream(), true);
-                in = new BufferedReader(new InputStreamReader(socket.getInputStream()));
+                // Her denemede yeni bir soket açılır
+                tempSocket = new Socket("localhost", 5005);
+                PrintWriter tempOut = new PrintWriter(tempSocket.getOutputStream(), true);
+                BufferedReader tempIn = new BufferedReader(new InputStreamReader(tempSocket.getInputStream()));
 
-                in.readLine(); // "Kullanıcı adını gir:"
-                out.println(username);
+                // 1) Sunucudan "Kullanıcı adını gir:" bekle
+                String lineFromServer = tempIn.readLine(); // "Kullanıcı adını gir:"
+                // İstersen debug: System.out.println("SERVER: " + lineFromServer);
+                tempOut.println(username);
 
-                in.readLine(); // "Rolünü yaz..."
-                out.println(role);
+                // 2) Sunucudan "Rolünü yaz (OWNER veya WORKER):" bekle
+                lineFromServer = tempIn.readLine();        // "Rolünü yaz..."
+                // System.out.println("SERVER: " + lineFromServer);
+                tempOut.println(desiredRole);
 
-                if (role.equals("OWNER")) {
-                    in.readLine(); // "Owner şifresini gir:"
-                    out.println(secret);
+                // 3) Eğer OWNER istendiyse şifre prompt'unu bekle, şifreyi yolla
+                if ("OWNER".equals(desiredRole)) {
+                    lineFromServer = tempIn.readLine();    // "Owner şifresini gir:" (sunucu böyle gönderiyor)
+                    // System.out.println("SERVER: " + lineFromServer);
+                    tempOut.println(secret);
                 }
 
-                String response = in.readLine();
-                if (response != null && (response.contains("WORKER") || response.contains("OWNER"))) {
+                // 4) Sunucunun durum cevabını al (başarılı / başarısız)
+                String response = tempIn.readLine();
+                // System.out.println("SERVER FINAL: " + response);
+
+                if (response != null &&
+                        response.contains("Patron (OWNER) olarak giriş yaptın.")) {
+                    // GERÇEKTEN OWNER OLARAK ALINDI
+                    Socket finalSocket = tempSocket;
                     SwingUtilities.invokeLater(() -> {
                         JOptionPane.showMessageDialog(this, response);
-                        this.dispose();
-                        new GameScreen(socket, username, role.equals("OWNER"));
+                        this.dispose(); // Login ekranını kapat
+                        new GameScreen(finalSocket, username, true); // isOwner = true
                     });
+
+                } else if (response != null &&
+                        response.contains("WORKER olarak giriş yaptın.")) {
+                    // GERÇEKTEN WORKER OLARAK ALINDI
+                    Socket finalSocket = tempSocket;
+                    SwingUtilities.invokeLater(() -> {
+                        JOptionPane.showMessageDialog(this, response);
+                        this.dispose(); // Login ekranını kapat
+                        new GameScreen(finalSocket, username, false); // isOwner = false
+                    });
+
                 } else {
-                    SwingUtilities.invokeLater(() -> JOptionPane.showMessageDialog(this, "Giriş başarısız: " + response));
-                    socket.close();
+                    // BAŞARISIZ GİRİŞ: şifre yanlış, owner zaten bağlı, vs.
+                    String finalResponse = (response != null) ? response : "Bağlantı kesildi.";
+                    SwingUtilities.invokeLater(() -> JOptionPane.showMessageDialog(
+                            this,
+                            "Giriş başarısız: " + finalResponse,
+                            "Giriş Hatası",
+                            JOptionPane.ERROR_MESSAGE
+                    ));
+
+                    // Soketi kapat, LoginScreen açık kalsın, kullanıcı tekrar deneyebilsin
+                    try {
+                        tempSocket.close();
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                    }
                 }
 
             } catch (IOException ex) {
-                SwingUtilities.invokeLater(() ->
-                        JOptionPane.showMessageDialog(this, "Server'a bağlanılamadı! Port 5005'te sunucu açık mı?")
-                );
+                Socket finalTempSocket = tempSocket;
+                SwingUtilities.invokeLater(() -> JOptionPane.showMessageDialog(
+                        this,
+                        "Server'a bağlanılamadı! Port 5005'te sunucu açık mı?",
+                        "Bağlantı Hatası",
+                        JOptionPane.ERROR_MESSAGE
+                ));
+
+                if (finalTempSocket != null) {
+                    try {
+                        finalTempSocket.close();
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                    }
+                }
             }
         }).start();
     }
+
 
     // Yuvarlak Kenarlık Sınıfı
     class RoundedBorder extends javax.swing.border.AbstractBorder {

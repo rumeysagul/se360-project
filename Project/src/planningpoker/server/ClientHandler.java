@@ -53,17 +53,23 @@ public class ClientHandler extends Thread {
                 out.println("Owner şifresini gir:");
                 String key = in.readLine();
 
-                if (server.getOwner() == null && server.isValidOwnerKey(key)) {
-                    // Şifre doğru ve daha önce owner yok → owner yap
-                    isOwner = true;
-                    server.setOwner(this);
-                    out.println("[SERVER] Patron (OWNER) olarak giriş yaptın.");
-                } else {
-                    // Şifre yanlış ya da zaten owner var
-                    out.println("[SERVER] Owner olma isteği reddedildi, WORKER olarak giriş yapıyorsun.");
-                    isOwner = false;
-                    server.getRoom().addWorker(username);
+                // Zaten bir owner varsa
+                if (server.getOwner() != null) {
+                    out.println("[SERVER] Owner zaten bağlı! Giriş reddedildi.");
+                    return;  // run() biter, finally'de socket kapanır
                 }
+
+                // Şifre yanlışsa
+                if (!server.isValidOwnerKey(key)) {
+                    out.println("[SERVER] Owner şifresi yanlış! Giriş reddedildi.");
+                    return;  // ❗ WORKER yapma, direkt çık
+                }
+
+                // Şifre doğruysa
+                isOwner = true;
+                server.setOwner(this);
+                out.println("[SERVER] Patron (OWNER) olarak giriş yaptın.");
+
             } else {
                 // Direkt worker
                 isOwner = false;
@@ -71,7 +77,9 @@ public class ClientHandler extends Thread {
                 out.println("[SERVER] WORKER olarak giriş yaptın.");
             }
 
+// buraya geldiyse gerçekten oyuna girmiş demektir
             server.broadcast("[SERVER] " + username + " katıldı.");
+
 
             String line;
             while ((line = in.readLine()) != null) {
