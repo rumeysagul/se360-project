@@ -76,6 +76,7 @@ public class ClientHandler extends Thread {
                 server.getRoom().addWorker(username);
                 out.println("[SERVER] WORKER olarak giriş yaptın.");
             }
+            DbManager.saveUser(username, isOwner ? "OWNER" : "WORKER");
 
 // buraya geldiyse gerçekten oyuna girmiş demektir
             server.broadcast("[SERVER] " + username + " katıldı.");
