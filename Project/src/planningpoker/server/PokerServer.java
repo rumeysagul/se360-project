@@ -83,7 +83,7 @@ public class PokerServer {
     }
 
     public static void main(String[] args) {
-        PokerServer server = new PokerServer(5000);
+        PokerServer server = new PokerServer(5005);
         server.start();
     }
 }

@@ -1,4 +1,4 @@
-// src/planningpoker/server/GameRoom.java
+// src/planningpoker/server/GameScreen.java
 package planningpoker.server;
 
 import java.util.*;
