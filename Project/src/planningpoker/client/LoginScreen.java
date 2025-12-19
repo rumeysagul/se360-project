@@ -22,7 +22,7 @@ public class LoginScreen extends JFrame {
     private static final Color PRIMARY_COLOR = Color.decode("#FF6D1F");
 
     public LoginScreen() {
-        setTitle("UniPoker Login");
+        setTitle("Planning Poker  Login");
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         setSize(700, 600);
         setLocationRelativeTo(null);
@@ -60,7 +60,7 @@ public class LoginScreen extends JFrame {
         iconLabel.setAlignmentX(Component.CENTER_ALIGNMENT);
 
         // === 2. BAŞLIK ===
-        JLabel title = new JLabel("UNIPOKER", SwingConstants.CENTER);
+        JLabel title = new JLabel("PLANNING POKER", SwingConstants.CENTER);
         title.setForeground(new Color(20, 20, 20));
         title.setAlignmentX(Component.CENTER_ALIGNMENT);
 
