@@ -143,7 +143,7 @@ public class ClientHandler extends Thread {
         server.getRoom().setCurrentTask(task, username);
 
         sendMessage("[SERVER] Task set: " + task);
-        server.broadcastToWorkers("[TASK] Yeni görev: " + task);
+        server.broadcastToWorkers("[TASK] New Task: " + task);
     }
 
     private void handleVote(String line) {
@@ -194,7 +194,7 @@ public class ClientHandler extends Thread {
         // Aynı task için yeni round başlat
         int newRoundId = server.getRoom().startNewRoundSameTask();
 
-        sendMessage("[SERVER] Oylar sıfırlandı. New round started for the same task. (ROUND_ID=" + newRoundId + ")");
-        server.broadcastToWorkers("[SERVER] Oylar sıfırlandı, please vote again.");
+        sendMessage("[SERVER] The Votes have been reset. New round started for the same task. (ROUND_ID=" + newRoundId + ")");
+        server.broadcastToWorkers("[SERVER] The Votes have been reset, please vote again.");
     }
 }
