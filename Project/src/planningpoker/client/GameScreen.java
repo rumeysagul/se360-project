@@ -21,7 +21,6 @@ public class GameScreen extends JFrame {
 
     // UI Bileşenleri
     private JLabel headerTitle;
-    // currentTaskLabel tamamen kaldırıldı
     private JTextArea logArea;
     private JPanel centerPanel;
     private JPanel mainContainer;
@@ -59,7 +58,7 @@ public class GameScreen extends JFrame {
         this.username = username;
         this.isOwner = isOwner;
 
-        setTitle("UniPoker - " + username);
+        setTitle("PLANNING POKER  - " + username);
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         setSize(950, 800);
         setLocationRelativeTo(null);
@@ -76,7 +75,7 @@ public class GameScreen extends JFrame {
             out = new PrintWriter(socket.getOutputStream(), true);
             in = new BufferedReader(new InputStreamReader(socket.getInputStream()));
         } catch (IOException e) {
-            JOptionPane.showMessageDialog(this, "Bağlantı Hatası!");
+            JOptionPane.showMessageDialog(this, "Connection Error!");
             System.exit(0);
         }
     }
@@ -97,30 +96,28 @@ public class GameScreen extends JFrame {
         headerPanel.setBorder(new EmptyBorder(30, 20, 10, 20));
 
         // 1. BAŞLIK
-        headerTitle = new JLabel("UNIPOKER");
+        headerTitle = new JLabel("PLANNING POKER ");
         headerTitle.setAlignmentX(Component.CENTER_ALIGNMENT);
         headerTitle.setForeground(ACCENT_COLOR);
         loadCustomFont(headerTitle, 70f);
 
         // 2. KULLANICI ROLÜ
-        JLabel userInfo = new JLabel(username + " (" + (isOwner ? "Yönetici" : "Oyuncu") + ")");
+        JLabel userInfo = new JLabel(username + " (" + (isOwner ? "Owner" : "Worker") + ")");
         userInfo.setAlignmentX(Component.CENTER_ALIGNMENT);
         userInfo.setFont(new Font("SansSerif", Font.BOLD, 16));
         userInfo.setForeground(Color.GRAY);
 
         // 3. WELCOME MESAJI (Turuncu)
-        JLabel welcomeLabel = new JLabel("HOŞ GELDİN " + username.toUpperCase() + "!");
+        JLabel welcomeLabel = new JLabel("WELCOME " + username.toUpperCase() + "!");
         welcomeLabel.setAlignmentX(Component.CENTER_ALIGNMENT);
         welcomeLabel.setFont(new Font("SansSerif", Font.BOLD, 26));
         welcomeLabel.setForeground(PRIMARY_COLOR);
-        welcomeLabel.setBorder(new EmptyBorder(15, 0, 15, 0)); // Altına da biraz boşluk
+        welcomeLabel.setBorder(new EmptyBorder(15, 0, 15, 0));
 
-        // Header'a sırasıyla ekleme
         headerPanel.add(headerTitle);
         headerPanel.add(Box.createVerticalStrut(5));
         headerPanel.add(userInfo);
         headerPanel.add(welcomeLabel);
-        // Görev adı/kutusu artık YOK.
 
         mainContainer.add(headerPanel, BorderLayout.NORTH);
 
@@ -146,7 +143,7 @@ public class GameScreen extends JFrame {
         footerPanel.setBorder(new EmptyBorder(10, 40, 30, 40));
         footerPanel.setPreferredSize(new Dimension(getWidth(), 250));
 
-        JLabel logLabel = new JLabel("Oyun Geçmişi:");
+        JLabel logLabel = new JLabel("Game History:");
         logLabel.setFont(new Font("SansSerif", Font.BOLD, 16));
         logLabel.setForeground(ACCENT_COLOR);
         logLabel.setBorder(new EmptyBorder(0, 0, 5, 0));
@@ -186,7 +183,7 @@ public class GameScreen extends JFrame {
 
             card.addActionListener(e -> {
                 if (!isTaskActive) {
-                    appendLog("⚠️ Henüz bir görev başlatılmadı! Lütfen bekleyin.");
+                    appendLog("⚠️ No task active yet! Please wait.");
                     return;
                 }
                 if (!hasVoted) {
@@ -194,7 +191,7 @@ public class GameScreen extends JFrame {
                     hasVoted = true;
                     sendMessage("VOTE:" + value);
                     updateCardVisuals();
-                    appendLog("Seçiminiz gönderildi: " + value);
+                    appendLog("Your selection has been sent: " + value);
                 }
             });
             cardButtons.add(card);
@@ -224,7 +221,7 @@ public class GameScreen extends JFrame {
         gbc.insets = new Insets(10, 10, 10, 10);
         gbc.fill = GridBagConstraints.HORIZONTAL;
 
-        JLabel lbl = new JLabel("Yeni Görev Tanımla");
+        JLabel lbl = new JLabel("Define New Task");
         lbl.setFont(new Font("SansSerif", Font.BOLD, 18));
         lbl.setHorizontalAlignment(SwingConstants.CENTER);
 
@@ -239,7 +236,7 @@ public class GameScreen extends JFrame {
         JPanel buttonGroup = new JPanel(new GridLayout(1, 2, 20, 0));
         buttonGroup.setOpaque(false);
 
-        JButton btnSend = createStyledButton("BAŞLAT", ACCENT_COLOR);
+        JButton btnSend = createStyledButton("START", ACCENT_COLOR);
         JButton btnReset = createStyledButton("RESET", PRIMARY_COLOR);
 
         buttonGroup.add(btnSend);
@@ -249,14 +246,14 @@ public class GameScreen extends JFrame {
             String task = taskField.getText().trim();
             if (!task.isEmpty()) {
                 sendMessage("TASK:" + task);
-                appendLog("Yeni görev tanımlandı: " + task);
+                appendLog("New task defined: " + task);
                 taskField.setText("");
             }
         });
 
         btnReset.addActionListener(e -> {
             sendMessage("RESET");
-            appendLog("Oylama sıfırlandı.");
+            appendLog("Voting has been reset.");
         });
 
         gbc.gridx = 0; gbc.gridy = 0;
@@ -324,7 +321,7 @@ public class GameScreen extends JFrame {
             try {
                 String line;
                 while ((line = in.readLine()) != null) {
-                    String msg = line;
+                    final String msg = line;
                     SwingUtilities.invokeLater(() -> processMessage(msg));
                 }
             } catch (IOException e) { /* Ignore */ }
@@ -333,7 +330,6 @@ public class GameScreen extends JFrame {
 
     private void processMessage(String msg) {
         if (msg.startsWith("[TASK]")) {
-            // Task geldiğinde sadece kilidi açıyoruz, ekrana yazı yazmıyoruz.
             if (!isOwner) {
                 isTaskActive = true;
                 selectedValue = -1;

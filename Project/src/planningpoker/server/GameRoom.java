@@ -75,12 +75,12 @@ public class GameRoom {
 
     public synchronized String calculateResultText() {
         ResultStats stats = computeStats();
-        if (stats == null) return "RESULT: Henüz oy yok.";
+        if (stats == null) return "RESULT: No votes yet.";
 
         String taskInfo = (currentTask != null) ? ("TASK=\"" + currentTask + "\" ") : "";
         return "RESULT: " + taskInfo +
                 "MIN=" + stats.min + ", MAX=" + stats.max + ", AVG=" + String.format("%.2f", stats.avg) +
-                " (TOPLAM OY=" + stats.total + ")";
+                " (TOTAL VOTES=" + stats.total + ")";
     }
 
     public synchronized void resetVotes() {

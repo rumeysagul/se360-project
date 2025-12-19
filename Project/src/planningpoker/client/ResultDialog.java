@@ -14,19 +14,20 @@ public class ResultDialog extends JDialog {
     private static final Color TEXT_COLOR = Color.BLACK;           // Yazı Rengi
 
     public ResultDialog(JFrame parent, String serverMsg) {
-        super(parent, "Oylama Sonucu", true);
+        super(parent, "Voting Results", true);
         setSize(650, 500);
         setLocationRelativeTo(parent);
         setResizable(false);
 
-        // Veriyi Ayrıştır
+        // Veriyi Ayrıştır (Parsing)
         String taskName = extractValue(serverMsg, "TASK=\"", "\"");
         String minVal = extractValue(serverMsg, "MIN=", ",");
         String maxVal = extractValue(serverMsg, "MAX=", ",");
         String avgVal = extractValue(serverMsg, "AVG=", " ");
-        String countVal = extractValue(serverMsg, "TOPLAM OY=", ")");
+        // Sunucu GameRoom sınıfında "TOTAL VOTES=" olarak güncellendiği varsayılmıştır
+        String countVal = extractValue(serverMsg, "TOTAL VOTES=", ")");
 
-        if (taskName.equals("?")) taskName = "Genel Oylama";
+        if (taskName.equals("?")) taskName = "General Voting";
 
         // --- Ana Panel ---
         JPanel mainPanel = new JPanel(new BorderLayout());
@@ -40,7 +41,7 @@ public class ResultDialog extends JDialog {
         headerPanel.setBorder(new EmptyBorder(0, 0, 30, 0));
 
         // Başlık
-        JLabel titleLabel = new JLabel("OYLAMA SONUÇLARI", SwingConstants.CENTER);
+        JLabel titleLabel = new JLabel("VOTING RESULTS", SwingConstants.CENTER);
         titleLabel.setFont(new Font("SansSerif", Font.BOLD, 28));
         titleLabel.setForeground(TEXT_COLOR);
         titleLabel.setAlignmentX(Component.CENTER_ALIGNMENT);
@@ -61,40 +62,34 @@ public class ResultDialog extends JDialog {
         JPanel gridPanel = new JPanel(new GridLayout(2, 2, 20, 20));
         gridPanel.setBackground(BG_COLOR);
 
-        gridPanel.add(new PixelResultCard("Ortalama", avgVal));
-        gridPanel.add(new PixelResultCard("Toplam Oy", countVal));
-        gridPanel.add(new PixelResultCard("En Az", minVal));
-        gridPanel.add(new PixelResultCard("En Çok", maxVal));
+        gridPanel.add(new PixelResultCard("Average", avgVal));
+        gridPanel.add(new PixelResultCard("Total Votes", countVal));
+        gridPanel.add(new PixelResultCard("Minimum", minVal));
+        gridPanel.add(new PixelResultCard("Maximum", maxVal));
 
         mainPanel.add(gridPanel, BorderLayout.CENTER);
 
-        // 3. KAPAT BUTONU (GÜNCELLENDİ)
+        // 3. KAPAT BUTONU
         JPanel footerPanel = new JPanel();
         footerPanel.setBackground(BG_COLOR);
         footerPanel.setBorder(new EmptyBorder(20, 0, 0, 0));
 
         // --- ÖZEL OVAL TURUNCU BUTON ---
-        JButton closeBtn = new JButton("Kapat") {
+        JButton closeBtn = new JButton("Close") {
             @Override
             protected void paintComponent(Graphics g) {
                 Graphics2D g2 = (Graphics2D) g;
-                // Butonun pürüzsüz (oval) görünmesi için Antialiasing AÇIK
                 g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
-
-                // Arka plan rengi (Turuncu)
                 g2.setColor(PRIMARY_COLOR);
-                // 30 radius ile tam oval/hap şekli
                 g2.fillRoundRect(0, 0, getWidth(), getHeight(), 30, 30);
-
                 super.paintComponent(g);
             }
         };
 
         closeBtn.setFont(new Font("SansSerif", Font.BOLD, 16));
-        closeBtn.setForeground(Color.WHITE); // Yazı Beyaz
-        closeBtn.setPreferredSize(new Dimension(150, 45)); // Biraz daha geniş
+        closeBtn.setForeground(Color.WHITE);
+        closeBtn.setPreferredSize(new Dimension(150, 45));
 
-        // Standart buton özelliklerini kapatıyoruz
         closeBtn.setFocusPainted(false);
         closeBtn.setContentAreaFilled(false);
         closeBtn.setBorderPainted(false);
@@ -136,7 +131,6 @@ public class ResultDialog extends JDialog {
         @Override
         protected void paintComponent(Graphics g) {
             Graphics2D g2 = (Graphics2D) g;
-            // PİKSEL GÖRÜNÜM (Anti-aliasing KAPALI)
             g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_OFF);
 
             int w = getWidth();
@@ -144,18 +138,15 @@ public class ResultDialog extends JDialog {
             int pixelSize = 4;
             int arcSize = 20;
 
-            // Kart Arka Planı (BEYAZ)
             g2.setColor(CARD_BG);
             g2.fillRoundRect(0, 0, w - pixelSize, h - pixelSize, arcSize, arcSize);
 
-            // Piksel Çerçeve (SİYAH)
             g2.setStroke(new BasicStroke(pixelSize));
             g2.setColor(BORDER_COLOR);
             g2.drawRoundRect(pixelSize/2, pixelSize/2, w - pixelSize - pixelSize/2, h - pixelSize - pixelSize/2, arcSize, arcSize);
         }
     }
 
-    // --- YARDIMCI METOT ---
     private String extractValue(String source, String startKey, String endKey) {
         try {
             int start = source.indexOf(startKey);
