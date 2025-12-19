@@ -128,6 +128,8 @@ public class ClientHandler extends Thread {
     }
 
     // Sadece OWNER kullanmalı: "TASK: bir şey"
+
+
     private void handleTask(String line) {
         if (!isOwner) {
             sendMessage("[HATA] Sadece OWNER yeni task tanımlayabilir.");
@@ -139,14 +141,13 @@ public class ClientHandler extends Thread {
             return;
         }
 
-        server.getRoom().setCurrentTask(task);
-        sendMessage("[SERVER] Task ayarlandı: " + task);
+        // Oyun state + DB
+        server.getRoom().setCurrentTask(task, username);
 
-        // Worker'lara task duyurulur
+        sendMessage("[SERVER] Task ayarlandı: " + task);
         server.broadcastToWorkers("[TASK] Yeni görev: " + task);
     }
 
-    // "VOTE:5" gibi bir satırı işler (sadece WORKER)
     private void handleVote(String line) {
         if (isOwner) {
             sendMessage("[HATA] OWNER oy veremez, sadece sonucu görür.");
@@ -158,19 +159,27 @@ public class ClientHandler extends Thread {
             int value = Integer.parseInt(valueStr);
 
             server.getRoom().addVote(username, value);
+
+            // DB: vote kaydet
+            int roundId = server.getRoom().getCurrentRoundId();
+            if (roundId != -1) {
+                DbManager.saveVote(roundId, username, value);
+            }
+
             sendMessage("[SERVER] Oyunuz kaydedildi: " + value);
 
-            // Eğer tüm worker'lar oy verdiyse:
             if (server.getRoom().allWorkersVoted()) {
                 String result = server.getRoom().calculateResultText();
 
-                // Sonuç SADECE OWNER'a gönderilir
-                ClientHandler owner = server.getOwner();
-                if (owner != null) {
-                    owner.sendMessage(result);
+                // DB: sonucu kaydet
+                GameRoom.ResultStats stats = server.getRoom().computeStats();
+                if (stats != null && roundId != -1) {
+                    DbManager.saveResult(roundId, stats.min, stats.max, stats.avg, stats.total);
                 }
 
-                // Worker'lara sadece bilgilendirme
+                ClientHandler owner = server.getOwner();
+                if (owner != null) owner.sendMessage(result);
+
                 server.broadcastToWorkers("[SERVER] Tüm oylar toplandı, sonuç patrona (OWNER) gönderildi.");
             }
         } catch (NumberFormatException e) {
@@ -178,15 +187,17 @@ public class ClientHandler extends Thread {
         }
     }
 
-    // "RESET" sadece OWNER
     private void handleReset() {
         if (!isOwner) {
             sendMessage("[HATA] Sadece OWNER reset yapabilir.");
             return;
         }
 
-        server.getRoom().resetVotes();
-        sendMessage("[SERVER] Oylar sıfırlandı. Aynı task için yeni oylama başlayabilir.");
+        // Aynı task için yeni round başlat
+        int newRoundId = server.getRoom().startNewRoundSameTask();
+
+        sendMessage("[SERVER] Oylar sıfırlandı. Aynı task için yeni tur başladı. (ROUND_ID=" + newRoundId + ")");
         server.broadcastToWorkers("[SERVER] Oylar sıfırlandı, lütfen tekrar oy verin.");
     }
+
 }
