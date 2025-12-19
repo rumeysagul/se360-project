@@ -65,12 +65,12 @@ public class PokerServer {
 
     public void start() {
         try (ServerSocket serverSocket = new ServerSocket(port)) {
-            System.out.println("PokerServer başlatıldı. Port: " + port);
+            System.out.println("PokerServer started. Port: " + port);
 
             while (true) {
-                System.out.println("Client bekleniyor...");
+                System.out.println("Waiting for client...");
                 Socket clientSocket = serverSocket.accept();
-                System.out.println("Client bağlandı: " + clientSocket.getInetAddress());
+                System.out.println("Client connected: " + clientSocket.getInetAddress());
 
                 ClientHandler handler = new ClientHandler(clientSocket, this);
                 addClient(handler);
@@ -83,7 +83,7 @@ public class PokerServer {
     }
 
     public static void main(String[] args) {
-        PokerServer server = new PokerServer(5005);
+        PokerServer server = new PokerServer(5007);
         server.start();
     }
 }

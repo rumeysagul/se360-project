@@ -1,4 +1,3 @@
-// src/planningpoker/server/ClientHandler.java
 package planningpoker.server;
 
 import java.io.*;
@@ -42,7 +41,7 @@ public class ClientHandler extends Thread {
             // 1) Kullanıcı adı
             out.println("Kullanıcı adını gir:");
             username = in.readLine();
-            System.out.println("Yeni kullanıcı: " + username);
+            System.out.println("New user: " + username);
 
             // 2) Rol seçimi
             out.println("Rolünü yaz (OWNER veya WORKER):");
@@ -55,13 +54,13 @@ public class ClientHandler extends Thread {
 
                 // Zaten bir owner varsa
                 if (server.getOwner() != null) {
-                    out.println("[SERVER] Owner zaten bağlı! Giriş reddedildi.");
+                    out.println("[SERVER] Owner is already connected! Access denied.");
                     return;  // run() biter, finally'de socket kapanır
                 }
 
                 // Şifre yanlışsa
                 if (!server.isValidOwnerKey(key)) {
-                    out.println("[SERVER] Owner şifresi yanlış! Giriş reddedildi.");
+                    out.println("[SERVER] Incorrect owner password! Access denied.");
                     return;  // ❗ WORKER yapma, direkt çık
                 }
 
@@ -78,8 +77,8 @@ public class ClientHandler extends Thread {
             }
             DbManager.saveUser(username, isOwner ? "OWNER" : "WORKER");
 
-// buraya geldiyse gerçekten oyuna girmiş demektir
-            server.broadcast("[SERVER] " + username + " katıldı.");
+            // buraya geldiyse gerçekten oyuna girmiş demektir
+            server.broadcast("[SERVER] " + username + " has joined the session.");
 
 
             String line;
@@ -109,7 +108,7 @@ public class ClientHandler extends Thread {
             }
 
         } catch (IOException e) {
-            System.out.println("Kullanıcı bağlantısı koptu: " + username);
+            System.out.println("User connection lost: " + username);
         } finally {
             // Worker ise room'dan da çıkar
             if (!isOwner) {
@@ -117,40 +116,39 @@ public class ClientHandler extends Thread {
             }
 
             server.removeClient(this);
-            server.broadcast("[SERVER] " + username + " ayrıldı.");
+            server.broadcast("[SERVER] " + username + " has left the session.");
             try {
                 socket.close();
             } catch (IOException e) {
                 e.printStackTrace();
             }
-            System.out.println("ClientHandler sonlandı: " + username);
+            System.out.println("ClientHandler terminated: " + username);
         }
     }
 
     // Sadece OWNER kullanmalı: "TASK: bir şey"
 
-
     private void handleTask(String line) {
         if (!isOwner) {
-            sendMessage("[HATA] Sadece OWNER yeni task tanımlayabilir.");
+            sendMessage("[ERROR] Only the OWNER can define a new task.");
             return;
         }
         String task = line.substring("TASK:".length()).trim();
         if (task.isEmpty()) {
-            sendMessage("[HATA] Task boş olamaz. Örnek: TASK: Login ekranı için şifre resetleme");
+            sendMessage("[ERROR] Task cannot be empty. Example: TASK: Password reset feature");
             return;
         }
 
         // Oyun state + DB
         server.getRoom().setCurrentTask(task, username);
 
-        sendMessage("[SERVER] Task ayarlandı: " + task);
+        sendMessage("[SERVER] Task set: " + task);
         server.broadcastToWorkers("[TASK] Yeni görev: " + task);
     }
 
     private void handleVote(String line) {
         if (isOwner) {
-            sendMessage("[HATA] OWNER oy veremez, sadece sonucu görür.");
+            sendMessage("[ERROR] OWNER cannot vote, can only view the results.");
             return;
         }
 
@@ -166,7 +164,7 @@ public class ClientHandler extends Thread {
                 DbManager.saveVote(roundId, username, value);
             }
 
-            sendMessage("[SERVER] Oyunuz kaydedildi: " + value);
+            sendMessage("[SERVER] Your vote has been recorded: " + value);
 
             if (server.getRoom().allWorkersVoted()) {
                 String result = server.getRoom().calculateResultText();
@@ -180,24 +178,23 @@ public class ClientHandler extends Thread {
                 ClientHandler owner = server.getOwner();
                 if (owner != null) owner.sendMessage(result);
 
-                server.broadcastToWorkers("[SERVER] Tüm oylar toplandı, sonuç patrona (OWNER) gönderildi.");
+                server.broadcastToWorkers("[SERVER] All votes collected, results sent to the OWNER.");
             }
         } catch (NumberFormatException e) {
-            sendMessage("[HATA] VOTE komutu 'VOTE:5' şeklinde olmalı.");
+            sendMessage("[ERROR] VOTE command must be in 'VOTE:5' format.");
         }
     }
 
     private void handleReset() {
         if (!isOwner) {
-            sendMessage("[HATA] Sadece OWNER reset yapabilir.");
+            sendMessage("[ERROR] Only the OWNER can reset the voting session.");
             return;
         }
 
         // Aynı task için yeni round başlat
         int newRoundId = server.getRoom().startNewRoundSameTask();
 
-        sendMessage("[SERVER] Oylar sıfırlandı. Aynı task için yeni tur başladı. (ROUND_ID=" + newRoundId + ")");
-        server.broadcastToWorkers("[SERVER] Oylar sıfırlandı, lütfen tekrar oy verin.");
+        sendMessage("[SERVER] Oylar sıfırlandı. New round started for the same task. (ROUND_ID=" + newRoundId + ")");
+        server.broadcastToWorkers("[SERVER] Oylar sıfırlandı, please vote again.");
     }
-
 }

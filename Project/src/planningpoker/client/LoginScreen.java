@@ -42,20 +42,17 @@ public class LoginScreen extends JFrame {
         // === 1. İKON (ImageIO ile JAR Uyumlu) ===
         JLabel iconLabel;
         try {
-            // "/card.png" resources klasörünün kökünden bakar
             InputStream imgStream = getClass().getResourceAsStream("/card.png");
             if (imgStream != null) {
                 BufferedImage img = ImageIO.read(imgStream);
                 Image scaledImg = img.getScaledInstance(120, 120, Image.SCALE_SMOOTH);
                 iconLabel = new JLabel(new ImageIcon(scaledImg));
             } else {
-                // Resim yoksa Emoji koy
                 iconLabel = new JLabel("♠️", SwingConstants.CENTER);
                 iconLabel.setFont(new Font("SansSerif", Font.BOLD, 100));
                 iconLabel.setForeground(PRIMARY_COLOR);
             }
         } catch (Exception e) {
-            // Hata olursa Emoji koy
             iconLabel = new JLabel("♠️", SwingConstants.CENTER);
             iconLabel.setFont(new Font("SansSerif", Font.BOLD, 100));
             iconLabel.setForeground(PRIMARY_COLOR);
@@ -85,7 +82,7 @@ public class LoginScreen extends JFrame {
         // === 3. GİRİŞ ALANLARI ===
 
         // Kullanıcı Adı
-        JLabel nameLabel = new JLabel("Kullanıcı Adı:");
+        JLabel nameLabel = new JLabel("Username:");
         nameLabel.setFont(new Font("SansSerif", Font.BOLD, 14));
         nameLabel.setAlignmentX(Component.CENTER_ALIGNMENT);
 
@@ -118,7 +115,7 @@ public class LoginScreen extends JFrame {
         rolePanel.setAlignmentX(Component.CENTER_ALIGNMENT);
 
         // Şifre Alanı
-        JLabel passwordLabel = new JLabel("Owner Şifresi:");
+        JLabel passwordLabel = new JLabel("Owner Password:");
         passwordLabel.setFont(new Font("SansSerif", Font.BOLD, 14));
         passwordLabel.setAlignmentX(Component.CENTER_ALIGNMENT);
 
@@ -171,7 +168,7 @@ public class LoginScreen extends JFrame {
         connectBtn.addActionListener(e -> performLogin());
 
         // === 5. YERLEŞİM (Burası Çok Önemli!) ===
-        content.add(iconLabel); // <-- İşte o sihirli satır!
+        content.add(iconLabel);
         content.add(Box.createVerticalStrut(10));
         content.add(title);
         content.add(Box.createVerticalStrut(25));
@@ -194,11 +191,10 @@ public class LoginScreen extends JFrame {
     }
 
     // === SUNUCUYA BAĞLANMA ===
-    // === SUNUCUYA BAĞLANMA ===
     private void performLogin() {
         String username = nameField.getText().trim();
         if (username.isEmpty()) {
-            JOptionPane.showMessageDialog(this, "Lütfen bir isim girin!");
+            JOptionPane.showMessageDialog(this, "Please enter a username!");
             return;
         }
 
@@ -207,7 +203,7 @@ public class LoginScreen extends JFrame {
         String secret = new String(passwordField.getPassword());
 
         if (desiredRole.equals("OWNER") && secret.trim().isEmpty()) {
-            JOptionPane.showMessageDialog(this, "Owner şifresi gerekli!");
+            JOptionPane.showMessageDialog(this, "Owner password is required!");
             return;
         }
 
@@ -215,39 +211,35 @@ public class LoginScreen extends JFrame {
             Socket tempSocket = null;
             try {
                 // Her denemede yeni bir soket açılır
-                tempSocket = new Socket("localhost", 5005);
+                tempSocket = new Socket("localhost", 5007);
                 PrintWriter tempOut = new PrintWriter(tempSocket.getOutputStream(), true);
                 BufferedReader tempIn = new BufferedReader(new InputStreamReader(tempSocket.getInputStream()));
 
                 // 1) Sunucudan "Kullanıcı adını gir:" bekle
-                String lineFromServer = tempIn.readLine(); // "Kullanıcı adını gir:"
-                // İstersen debug: System.out.println("SERVER: " + lineFromServer);
+                String lineFromServer = tempIn.readLine();
                 tempOut.println(username);
 
                 // 2) Sunucudan "Rolünü yaz (OWNER veya WORKER):" bekle
-                lineFromServer = tempIn.readLine();        // "Rolünü yaz..."
-                // System.out.println("SERVER: " + lineFromServer);
+                lineFromServer = tempIn.readLine();
                 tempOut.println(desiredRole);
 
                 // 3) Eğer OWNER istendiyse şifre prompt'unu bekle, şifreyi yolla
                 if ("OWNER".equals(desiredRole)) {
-                    lineFromServer = tempIn.readLine();    // "Owner şifresini gir:" (sunucu böyle gönderiyor)
-                    // System.out.println("SERVER: " + lineFromServer);
+                    lineFromServer = tempIn.readLine();
                     tempOut.println(secret);
                 }
 
                 // 4) Sunucunun durum cevabını al (başarılı / başarısız)
                 String response = tempIn.readLine();
-                // System.out.println("SERVER FINAL: " + response);
 
                 if (response != null &&
                         response.contains("Patron (OWNER) olarak giriş yaptın.")) {
                     // GERÇEKTEN OWNER OLARAK ALINDI
                     Socket finalSocket = tempSocket;
                     SwingUtilities.invokeLater(() -> {
-                        JOptionPane.showMessageDialog(this, response);
-                        this.dispose(); // Login ekranını kapat
-                        new GameScreen(finalSocket, username, true); // isOwner = true
+                        JOptionPane.showMessageDialog(this, "Successfully logged in as OWNER!");
+                        this.dispose();
+                        new GameScreen(finalSocket, username, true);
                     });
 
                 } else if (response != null &&
@@ -255,22 +247,21 @@ public class LoginScreen extends JFrame {
                     // GERÇEKTEN WORKER OLARAK ALINDI
                     Socket finalSocket = tempSocket;
                     SwingUtilities.invokeLater(() -> {
-                        JOptionPane.showMessageDialog(this, response);
-                        this.dispose(); // Login ekranını kapat
-                        new GameScreen(finalSocket, username, false); // isOwner = false
+                        JOptionPane.showMessageDialog(this, "Successfully logged in as WORKER!");
+                        this.dispose();
+                        new GameScreen(finalSocket, username, false);
                     });
 
                 } else {
-                    // BAŞARISIZ GİRİŞ: şifre yanlış, owner zaten bağlı, vs.
-                    String finalResponse = (response != null) ? response : "Bağlantı kesildi.";
+                    // BAŞARISIZ GİRİŞ
+                    String finalResponse = (response != null) ? response : "Connection lost.";
                     SwingUtilities.invokeLater(() -> JOptionPane.showMessageDialog(
                             this,
-                            "Giriş başarısız: " + finalResponse,
-                            "Giriş Hatası",
+                            "Login failed: " + finalResponse,
+                            "Login Error",
                             JOptionPane.ERROR_MESSAGE
                     ));
 
-                    // Soketi kapat, LoginScreen açık kalsın, kullanıcı tekrar deneyebilsin
                     try {
                         tempSocket.close();
                     } catch (IOException e) {
@@ -282,8 +273,8 @@ public class LoginScreen extends JFrame {
                 Socket finalTempSocket = tempSocket;
                 SwingUtilities.invokeLater(() -> JOptionPane.showMessageDialog(
                         this,
-                        "Server'a bağlanılamadı! Port 5005'te sunucu açık mı?",
-                        "Bağlantı Hatası",
+                        "Could not connect to server! Is the server running on port 5005?",
+                        "Connection Error",
                         JOptionPane.ERROR_MESSAGE
                 ));
 
