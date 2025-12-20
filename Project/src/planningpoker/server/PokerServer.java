@@ -14,7 +14,7 @@ public class PokerServer {
     private final GameRoom room = new GameRoom();   // oyun durumu
 
     private ClientHandler owner;                     // patron
-    private static final String OWNER_SECRET = "owner123"; // 🔑 Patron şifresi (istersen değiştir)
+    private static final String OWNER_SECRET = "owner123"; //  Patron şifresi
 
     public PokerServer(int port) {
         this.port = port;

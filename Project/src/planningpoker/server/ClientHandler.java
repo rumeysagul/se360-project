@@ -48,7 +48,7 @@ public class ClientHandler extends Thread {
             String role = in.readLine();
 
             if (role != null && role.equalsIgnoreCase("OWNER")) {
-                // OWNER olmak istiyor → şifre iste
+                // OWNER olmak istiyor -> şifre iste
                 out.println("Owner şifresini gir:");
                 String key = in.readLine();
 
@@ -61,7 +61,7 @@ public class ClientHandler extends Thread {
                 // Şifre yanlışsa
                 if (!server.isValidOwnerKey(key)) {
                     out.println("[SERVER] Incorrect owner password! Access denied.");
-                    return;  // ❗ WORKER yapma, direkt çık
+                    return;  //  WORKER yapma, direkt çık
                 }
 
                 // Şifre doğruysa
@@ -89,19 +89,19 @@ public class ClientHandler extends Thread {
                     break;
                 }
 
-                // OWNER → TASK tanımlar
+                // OWNER -> TASK tanımlar
                 if (line.startsWith("TASK:")) {
                     handleTask(line);
                 }
-                // WORKER → VOTE verir
+                // WORKER -> VOTE verir
                 else if (line.startsWith("VOTE:")) {
                     handleVote(line);
                 }
-                // OWNER → RESET ile oyları temizler
+                // OWNER -> RESET ile oyları temizler
                 else if (line.equalsIgnoreCase("RESET")) {
                     handleReset();
                 }
-                // Normal chat mesajı (istersen kalsın)
+                // Normal chat mesajı
                 else {
                     server.broadcast("[" + username + "]: " + line);
                 }
@@ -126,7 +126,7 @@ public class ClientHandler extends Thread {
         }
     }
 
-    // Sadece OWNER kullanmalı: "TASK: bir şey"
+    // Sadece OWNER kullanmalı
 
     private void handleTask(String line) {
         if (!isOwner) {
