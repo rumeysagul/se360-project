@@ -58,7 +58,7 @@ public class GameScreen extends JFrame {
         this.username = username;
         this.isOwner = isOwner;
 
-        setTitle("UniPoker - " + username);
+        setTitle("PLANNING POKER  - " + username);
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         setSize(950, 800);
         setLocationRelativeTo(null);
@@ -96,13 +96,13 @@ public class GameScreen extends JFrame {
         headerPanel.setBorder(new EmptyBorder(30, 20, 10, 20));
 
         // 1. BAŞLIK
-        headerTitle = new JLabel("UNIPOKER");
+        headerTitle = new JLabel("PLANNING POKER ");
         headerTitle.setAlignmentX(Component.CENTER_ALIGNMENT);
         headerTitle.setForeground(ACCENT_COLOR);
         loadCustomFont(headerTitle, 70f);
 
         // 2. KULLANICI ROLÜ
-        JLabel userInfo = new JLabel(username + " (" + (isOwner ? "Administrator" : "Player") + ")");
+        JLabel userInfo = new JLabel(username + " (" + (isOwner ? "Owner" : "Worker") + ")");
         userInfo.setAlignmentX(Component.CENTER_ALIGNMENT);
         userInfo.setFont(new Font("SansSerif", Font.BOLD, 16));
         userInfo.setForeground(Color.GRAY);
