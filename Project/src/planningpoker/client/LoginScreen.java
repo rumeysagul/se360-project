@@ -39,7 +39,7 @@ public class LoginScreen extends JFrame {
         content.setLayout(new BoxLayout(content, BoxLayout.Y_AXIS));
         content.setBorder(new EmptyBorder(40, 40, 40, 40));
 
-        // === 1. İKON (ImageIO ile JAR Uyumlu) ===
+        //  1. İKON (ImageIO ile JAR Uyumlu)
         JLabel iconLabel;
         try {
             InputStream imgStream = getClass().getResourceAsStream("/card.png");
@@ -59,12 +59,12 @@ public class LoginScreen extends JFrame {
         }
         iconLabel.setAlignmentX(Component.CENTER_ALIGNMENT);
 
-        // === 2. BAŞLIK ===
+        //  2. BAŞLIK
         JLabel title = new JLabel("PLANNING POKER", SwingConstants.CENTER);
         title.setForeground(new Color(20, 20, 20));
         title.setAlignmentX(Component.CENTER_ALIGNMENT);
 
-        // Font Yükleme (JAR Uyumlu)
+        // Font Yükleme
         try {
             InputStream fontStream = getClass().getResourceAsStream("/fonts/Jersey15-Regular.ttf");
             if (fontStream != null) {
@@ -79,7 +79,7 @@ public class LoginScreen extends JFrame {
             title.setFont(new Font("SansSerif", Font.BOLD, 60));
         }
 
-        // === 3. GİRİŞ ALANLARI ===
+        //  3. GİRİŞ ALANLARI
 
         // Kullanıcı Adı
         JLabel nameLabel = new JLabel("Username:");
@@ -145,7 +145,7 @@ public class LoginScreen extends JFrame {
         ownerRadio.addActionListener(roleListener);
         workerRadio.addActionListener(roleListener);
 
-        // === 4. CONNECT BUTONU ===
+        //  4. CONNECT BUTONU
         JButton connectBtn = new JButton("Connect") {
             @Override
             protected void paintComponent(Graphics g) {
@@ -167,7 +167,7 @@ public class LoginScreen extends JFrame {
 
         connectBtn.addActionListener(e -> performLogin());
 
-        // === 5. YERLEŞİM (Burası Çok Önemli!) ===
+        //  5. YERLEŞİM
         content.add(iconLabel);
         content.add(Box.createVerticalStrut(10));
         content.add(title);
@@ -190,7 +190,7 @@ public class LoginScreen extends JFrame {
         setVisible(true);
     }
 
-    // === SUNUCUYA BAĞLANMA ===
+    //  SUNUCUYA BAĞLANMA
     private void performLogin() {
         String username = nameField.getText().trim();
         if (username.isEmpty()) {

@@ -102,7 +102,7 @@ public class DbManager {
         }
     }
 
-    // ====== YENİ: Task oluştur ======
+    //  Task oluştur
     public static int createTask(String taskText, String ownerUsername) {
         String sql = "INSERT INTO tasks(task_text, owner_username) VALUES (?, ?)";
         try (Connection conn = getConnection();
@@ -121,7 +121,7 @@ public class DbManager {
         return -1;
     }
 
-    // ====== YENİ: Round oluştur ======
+    //  Round oluştur
     public static int createRound(int taskId, int roundNo) {
         String sql = "INSERT INTO rounds(task_id, round_no) VALUES (?, ?)";
         try (Connection conn = getConnection();
@@ -140,7 +140,7 @@ public class DbManager {
         return -1;
     }
 
-    // ====== YENİ: Vote kaydet (aynı user aynı round’da tekrar oy atamasın diye UPSERT) ======
+    //  Vote kaydet (aynı user aynı round’da tekrar oy atamasın diye UPSERT)
     public static void saveVote(int roundId, String username, int value) {
         String sql = """
             INSERT INTO votes(round_id, username, value)
@@ -160,7 +160,7 @@ public class DbManager {
         }
     }
 
-    // ====== YENİ: Result kaydet (aynı round için 1 kez) ======
+    //  Result kaydet (aynı round için 1 kez)
     public static void saveResult(int roundId, int min, int max, double avg, int totalVotes) {
         String sql = """
             INSERT OR REPLACE INTO results(round_id, min_val, max_val, avg_val, total_votes)

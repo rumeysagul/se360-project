@@ -47,7 +47,7 @@ public class GameScreen extends JFrame {
     private static final int[] POKER_VALUES = {1, 2, 3, 5, 8, 13, 20, 40, 100};
     private int selectedValue = -1;
 
-    // --- KİLİT MEKANİZMASI ---
+    //  KİLİT MEKANİZMASI
     private boolean hasVoted = false;
     private boolean isTaskActive = false;
 
@@ -89,7 +89,7 @@ public class GameScreen extends JFrame {
         mainContainer.setBackground(BG_COLOR);
         add(mainContainer);
 
-        // === 1. HEADER (ÜST KISIM) ===
+        // 1. HEADER (ÜST KISIM)
         JPanel headerPanel = new JPanel();
         headerPanel.setLayout(new BoxLayout(headerPanel, BoxLayout.Y_AXIS));
         headerPanel.setBackground(BG_COLOR);
@@ -121,7 +121,7 @@ public class GameScreen extends JFrame {
 
         mainContainer.add(headerPanel, BorderLayout.NORTH);
 
-        // === 2. CENTER (ORTA ALAN) ===
+        //  2. CENTER (ORTA ALAN)
         centerPanel = new JPanel();
         centerPanel.setBackground(BG_COLOR);
         centerPanel.setBorder(new EmptyBorder(20, 20, 20, 20));
@@ -137,7 +137,7 @@ public class GameScreen extends JFrame {
         centerScroll.getViewport().setBackground(BG_COLOR);
         mainContainer.add(centerScroll, BorderLayout.CENTER);
 
-        // === 3. FOOTER (LOG ALANI) ===
+        //  3. FOOTER (LOG ALANI)
         JPanel footerPanel = new JPanel(new BorderLayout());
         footerPanel.setBackground(BG_COLOR);
         footerPanel.setBorder(new EmptyBorder(10, 40, 30, 40));
@@ -169,7 +169,7 @@ public class GameScreen extends JFrame {
         mainContainer.add(footerPanel, BorderLayout.SOUTH);
     }
 
-    // --- WORKER PANELİ ---
+    // WORKER PANELİ
     private void setupWorkerPanel() {
         centerPanel.removeAll();
         centerPanel.setLayout(new FlowLayout(FlowLayout.CENTER, 20, 20));
@@ -208,7 +208,7 @@ public class GameScreen extends JFrame {
         }
     }
 
-    // --- OWNER PANELİ ---
+    //  OWNER PANELİ
     private void setupOwnerPanel() {
         centerPanel.removeAll();
         centerPanel.setLayout(new BoxLayout(centerPanel, BoxLayout.Y_AXIS));
@@ -354,9 +354,9 @@ public class GameScreen extends JFrame {
         logArea.setCaretPosition(logArea.getDocument().getLength());
     }
 
-    // ==========================================================
+
     // INNER CLASSES
-    // ==========================================================
+
 
     // 1. KART GÖRÜNÜMLÜ BUTON
     class CardButton extends JButton {

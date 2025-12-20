@@ -24,12 +24,11 @@ public class ResultDialog extends JDialog {
         String minVal = extractValue(serverMsg, "MIN=", ",");
         String maxVal = extractValue(serverMsg, "MAX=", ",");
         String avgVal = extractValue(serverMsg, "AVG=", " ");
-        // Sunucu GameRoom sınıfında "TOTAL VOTES=" olarak güncellendiği varsayılmıştır
         String countVal = extractValue(serverMsg, "TOTAL VOTES=", ")");
 
         if (taskName.equals("?")) taskName = "General Voting";
 
-        // --- Ana Panel ---
+        //  Ana Panel
         JPanel mainPanel = new JPanel(new BorderLayout());
         mainPanel.setBackground(BG_COLOR);
         mainPanel.setBorder(new EmptyBorder(30, 40, 30, 40));
@@ -58,7 +57,7 @@ public class ResultDialog extends JDialog {
 
         mainPanel.add(headerPanel, BorderLayout.NORTH);
 
-        // 2. SONUÇ KARTLARI (2x2 IZGARA)
+        // 2. SONUÇ KARTLARI
         JPanel gridPanel = new JPanel(new GridLayout(2, 2, 20, 20));
         gridPanel.setBackground(BG_COLOR);
 
@@ -74,7 +73,7 @@ public class ResultDialog extends JDialog {
         footerPanel.setBackground(BG_COLOR);
         footerPanel.setBorder(new EmptyBorder(20, 0, 0, 0));
 
-        // --- ÖZEL OVAL TURUNCU BUTON ---
+        //  OVAL TURUNCU BUTON
         JButton closeBtn = new JButton("Close") {
             @Override
             protected void paintComponent(Graphics g) {
@@ -103,7 +102,7 @@ public class ResultDialog extends JDialog {
         add(mainPanel);
     }
 
-    // --- INNER CLASS: PİKSEL ÇERÇEVELİ KART ---
+    // INNER CLASS: PİKSEL ÇERÇEVELİ KART
     class PixelResultCard extends JPanel {
 
         public PixelResultCard(String title, String value) {
