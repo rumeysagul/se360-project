@@ -126,7 +126,7 @@ public class ClientHandler extends Thread {
         }
     }
 
-    // Sadece OWNER kullanmalı: "TASK: bir şey"
+    // Sadece OWNER kullanmalı
 
     private void handleTask(String line) {
         if (!isOwner) {

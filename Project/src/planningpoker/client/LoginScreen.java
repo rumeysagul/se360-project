@@ -42,7 +42,7 @@ public class LoginScreen extends JFrame {
         content.setLayout(new BoxLayout(content, BoxLayout.Y_AXIS));
         content.setBorder(new EmptyBorder(40, 40, 40, 40));
 
-        //  1. İKON (ImageIO ile JAR Uyumlu)
+        //  1. İKON
         JLabel iconLabel;
         try {
             InputStream imgStream = getClass().getResourceAsStream("/card.png");
@@ -239,7 +239,7 @@ public class LoginScreen extends JFrame {
 
                 if (response != null &&
                         response.contains("Patron (OWNER) olarak giriş yaptın.")) {
-                    // GERÇEKTEN OWNER OLARAK ALINDI
+                    //  OWNER OLARAK ALINDI
                     Socket finalSocket = tempSocket;
                     SwingUtilities.invokeLater(() -> {
                         JOptionPane.showMessageDialog(this, "Successfully logged in as OWNER!");
@@ -249,7 +249,7 @@ public class LoginScreen extends JFrame {
 
                 } else if (response != null &&
                         response.contains("WORKER olarak giriş yaptın.")) {
-                    // GERÇEKTEN WORKER OLARAK ALINDI
+                    //  WORKER OLARAK ALINDI
                     Socket finalSocket = tempSocket;
                     SwingUtilities.invokeLater(() -> {
                         JOptionPane.showMessageDialog(this, "Successfully logged in as WORKER!");

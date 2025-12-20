@@ -40,7 +40,7 @@ public class DbManager {
             );
         """;
 
-        // Aynı task için birden fazla oylama turu (RESET vs.)
+        // Aynı task için birden fazla oylama turu
         String rounds = """
             CREATE TABLE IF NOT EXISTS rounds (
                 id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -89,7 +89,7 @@ public class DbManager {
         }
     }
 
-    // Zaten vardı, aynen durabilir
+
     public static void saveUser(String username, String role) {
         String sql = "INSERT OR IGNORE INTO users(username, role) VALUES (?, ?)";
         try (Connection conn = getConnection();

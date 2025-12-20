@@ -324,7 +324,7 @@ public class GameScreen extends JFrame {
                     final String msg = line;
                     SwingUtilities.invokeLater(() -> processMessage(msg));
                 }
-            } catch (IOException e) { /* Ignore */ }
+            } catch (IOException e) {  }
         }).start();
     }
 
